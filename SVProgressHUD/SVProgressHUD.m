@@ -34,6 +34,7 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
 
 @property (nonatomic, strong) UIControl *overlayView;
 @property (nonatomic, strong) UIView *hudView;
+@property (nonatomic, weak) UIView *containerView;
 
 @property (nonatomic, strong) UILabel *statusLabel;
 @property (nonatomic, strong) UIImageView *imageView;
@@ -593,25 +594,30 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
 - (void)updateViewHierachy {
     // Add the overlay (e.g. black, gradient) to the application window if necessary
     if(!self.overlayView.superview) {
+        if (self.containerView) {
+            [self.containerView addSubview:self.overlayView];
+        } else {
 #if !defined(SV_APP_EXTENSIONS)
-        // Default case: iterate over UIApplication windows
-        NSEnumerator *frontToBackWindows = [UIApplication.sharedApplication.windows reverseObjectEnumerator];
-        for (UIWindow *window in frontToBackWindows) {
-            BOOL windowOnMainScreen = window.screen == UIScreen.mainScreen;
-            BOOL windowIsVisible = !window.hidden && window.alpha > 0;
-            BOOL windowLevelNormal = window.windowLevel == UIWindowLevelNormal;
-            
-            if(windowOnMainScreen && windowIsVisible && windowLevelNormal) {
-                [window addSubview:self.overlayView];
-                break;
+            // Default case: iterate over UIApplication windows
+            NSEnumerator *frontToBackWindows = [UIApplication.sharedApplication.windows reverseObjectEnumerator];
+            for (UIWindow *window in frontToBackWindows) {
+                BOOL windowOnMainScreen = window.screen == UIScreen.mainScreen;
+                BOOL windowIsVisible = !window.hidden && window.alpha > 0;
+                BOOL windowLevelNormal = window.windowLevel == UIWindowLevelNormal;
+
+                if(windowOnMainScreen && windowIsVisible && windowLevelNormal) {
+                    [window addSubview:self.overlayView];
+                    break;
+                }
             }
-        }
+
 #else
-        // If SVProgressHUD ist used inside an app extension add it to the given view
-        if(self.viewForExtension) {
-            [self.viewForExtension addSubview:self.overlayView];
-        }
+            // If SVProgressHUD ist used inside an app extension add it to the given view
+            if(self.viewForExtension) {
+                [self.viewForExtension addSubview:self.overlayView];
+            }
 #endif
+        }
     } else {
         // The HUD is already on screen, but maybot not in front. Therefore
         // ensure that overlay will be on top of rootViewController (which may
@@ -1410,6 +1416,18 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
 
 - (void)setFadeOutAnimationDuration:(NSTimeInterval)duration  {
     if (!_isInitializing) _fadeOutAnimationDuration = duration;
+}
+
++ (instancetype)showHUDAddedTo:(UIView *)containerView status:(NSString *)status {
+    SVProgressHUD *hud;
+#if !defined(SV_APP_EXTENSIONS)
+    hud = [[SVProgressHUD alloc] initWithFrame:[[[UIApplication sharedApplication] delegate] window].bounds];
+#else
+    hud = [[SVProgressHUD alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+#endif
+    hud.containerView = containerView;
+    [hud showProgress:SVProgressHUDUndefinedProgress status:status];
+    return hud;
 }
 
 @end
