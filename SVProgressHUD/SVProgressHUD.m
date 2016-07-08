@@ -694,15 +694,15 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
     double animationDuration = 0.0;
 
 #if !defined(SV_APP_EXTENSIONS) && TARGET_OS_IOS
-    self.frame = [[[UIApplication sharedApplication] delegate] window].bounds;
+    self.frame = (self.containerView != nil)? self.containerView.bounds: [[[UIApplication sharedApplication] delegate] window].bounds;
     UIInterfaceOrientation orientation = UIApplication.sharedApplication.statusBarOrientation;
 #elif !defined(SV_APP_EXTENSIONS)
-    self.frame = [UIApplication sharedApplication].keyWindow.bounds;
+    self.frame = (self.containerView != nil)? self.containerView.bounds: [UIApplication sharedApplication].keyWindow.bounds;
 #else
     if (self.viewForExtension) {
-        self.frame = self.viewForExtension.frame;
+        self.frame = (self.containerView != nil)? self.containerView.bounds: self.viewForExtension.frame;
     } else {
-        self.frame = UIScreen.mainScreen.bounds;
+        self.frame = (self.containerView != nil)? self.containerView.bounds: UIScreen.mainScreen.bounds;
     }
     UIInterfaceOrientation orientation = CGRectGetWidth(self.frame) > CGRectGetHeight(self.frame) ? UIInterfaceOrientationLandscapeLeft : UIInterfaceOrientationPortrait;
 #endif
@@ -1419,12 +1419,7 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
 }
 
 + (instancetype)showHUDAddedTo:(UIView *)containerView status:(NSString *)status {
-    SVProgressHUD *hud;
-#if !defined(SV_APP_EXTENSIONS)
-    hud = [[SVProgressHUD alloc] initWithFrame:[[[UIApplication sharedApplication] delegate] window].bounds];
-#else
-    hud = [[SVProgressHUD alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-#endif
+    SVProgressHUD *hud = [[SVProgressHUD alloc] initWithFrame:containerView.bounds];
     hud.containerView = containerView;
     [hud showProgress:SVProgressHUDUndefinedProgress status:status];
     return hud;
