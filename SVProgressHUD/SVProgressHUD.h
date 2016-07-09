@@ -131,7 +131,7 @@ typedef void (^SVProgressHUDDismissCompletion)(void);
 
 + (NSTimeInterval)displayDurationForString:(NSString*)string;
 
-+ (instancetype)showHUDAddedTo:(UIView *)containerView status:(NSString *)status;
+- (void)showHUDAddedTo:(UIView *)containerView status:(NSString *)status;
 
 - (void)dismiss;
 

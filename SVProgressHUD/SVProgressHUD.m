@@ -1418,11 +1418,9 @@ static const CGFloat SVProgressHUDDefaultAnimationDuration = 0.15;
     if (!_isInitializing) _fadeOutAnimationDuration = duration;
 }
 
-+ (instancetype)showHUDAddedTo:(UIView *)containerView status:(NSString *)status {
-    SVProgressHUD *hud = [[SVProgressHUD alloc] initWithFrame:containerView.bounds];
-    hud.containerView = containerView;
-    [hud showProgress:SVProgressHUDUndefinedProgress status:status];
-    return hud;
+- (void)showHUDAddedTo:(UIView *)containerView status:(NSString *)status {
+    self.containerView = containerView;
+    [self showProgress:SVProgressHUDUndefinedProgress status:status];
 }
 
 @end
